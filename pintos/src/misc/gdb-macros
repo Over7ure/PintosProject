@@ -35,18 +35,18 @@ define dumplist
 end
 
 document dumplist
-    Dump the content of a Pintos list,
+    Dump the content of a Pintos list, 
     invoke as dumplist name_of_list name_of_struct name_of_elem_in_list_struct
 end
 
 # print a thread's backtrace, given a pointer to the struct thread *
 define btthread
-   if $arg0 == ($esp - ((unsigned)$esp % 4096))
+   if $arg0 == ($esp - ((unsigned)$esp % 4096)) 
 	bt
    else
-       set $saveEIP = $eip
-       set $saveESP = $esp
-       set $saveEBP = $ebp
+       set $saveEIP = $eip 
+       set $saveESP = $esp 
+       set $saveEBP = $ebp 
 
        set $esp = ((struct thread *)$arg0)->stack
        set $ebp = ((void**)$esp)[2]

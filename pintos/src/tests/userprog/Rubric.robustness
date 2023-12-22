@@ -46,7 +46,3 @@ Robustness of system calls:
 1	bad-read2
 1	bad-write2
 1	bad-jump2
-
-- Test floating point compilation and initialization
-1	floating-point
-2	fp-init

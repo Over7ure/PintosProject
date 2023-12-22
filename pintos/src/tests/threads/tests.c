@@ -1,9 +1,16 @@
 #include "tests/threads/tests.h"
-#include <test-lib.h>
 #include <debug.h>
 #include <string.h>
+#include <stdio.h>
 
-static const struct test threads_tests[] = {
+struct test 
+  {
+    const char *name;
+    test_func *function;
+  };
+
+static const struct test tests[] = 
+  {
     {"alarm-single", test_alarm_single},
     {"alarm-multiple", test_alarm_multiple},
     {"alarm-simultaneous", test_alarm_simultaneous},
@@ -22,12 +29,6 @@ static const struct test threads_tests[] = {
     {"priority-preempt", test_priority_preempt},
     {"priority-sema", test_priority_sema},
     {"priority-condvar", test_priority_condvar},
-    {"priority-starve", test_priority_starve},
-    {"priority-starve-sema", test_priority_starve_sema},
-    {"st-matmul", test_mt_matmul_1},
-    {"mt-matmul-2", test_mt_matmul_2},
-    {"mt-matmul-4", test_mt_matmul_4},
-    {"mt-matmul-16", test_mt_matmul_16},
     {"mlfqs-load-1", test_mlfqs_load_1},
     {"mlfqs-load-60", test_mlfqs_load_60},
     {"mlfqs-load-avg", test_mlfqs_load_avg},
@@ -37,32 +38,65 @@ static const struct test threads_tests[] = {
     {"mlfqs-nice-2", test_mlfqs_nice_2},
     {"mlfqs-nice-10", test_mlfqs_nice_10},
     {"mlfqs-block", test_mlfqs_block},
-    {"smfs-starve-0", test_smfs_starve_0},
-    {"smfs-starve-1", test_smfs_starve_1},
-    {"smfs-starve-2", test_smfs_starve_2},
-    {"smfs-starve-4", test_smfs_starve_4},
-    {"smfs-starve-8", test_smfs_starve_8},
-    {"smfs-starve-16", test_smfs_starve_16},
-    {"smfs-starve-64", test_smfs_starve_64},
-    {"smfs-starve-256", test_smfs_starve_256},
-    {"smfs-prio-change", test_smfs_prio_change},
-    {"smfs-hierarchy-8", test_smfs_hierarchy_8},
-    {"smfs-hierarchy-16", test_smfs_hierarchy_16},
-    {"smfs-hierarchy-32", test_smfs_hierarchy_32},
-    {"smfs-hierarchy-64", test_smfs_hierarchy_64},
-    {"smfs-hierarchy-256", test_smfs_hierarchy_256}};
+  };
 
-/* Runs the threads test named NAME. */
-void run_threads_test(const char* name) {
-  const struct test* t;
+static const char *test_name;
 
-  for (t = threads_tests; t < threads_tests + sizeof threads_tests / sizeof *threads_tests; t++)
-    if (!strcmp(name, t->name)) {
-      test_name = name;
-      msg("begin");
-      t->function();
-      msg("end");
-      return;
-    }
-  PANIC("no test named \"%s\"", name);
+/* Runs the test named NAME. */
+void
+run_test (const char *name) 
+{
+  const struct test *t;
+
+  for (t = tests; t < tests + sizeof tests / sizeof *tests; t++)
+    if (!strcmp (name, t->name))
+      {
+        test_name = name;
+        msg ("begin");
+        t->function ();
+        msg ("end");
+        return;
+      }
+  PANIC ("no test named \"%s\"", name);
 }
+
+/* Prints FORMAT as if with printf(),
+   prefixing the output by the name of the test
+   and following it with a new-line character. */
+void
+msg (const char *format, ...) 
+{
+  va_list args;
+  
+  printf ("(%s) ", test_name);
+  va_start (args, format);
+  vprintf (format, args);
+  va_end (args);
+  putchar ('\n');
+}
+
+/* Prints failure message FORMAT as if with printf(),
+   prefixing the output by the name of the test and FAIL:
+   and following it with a new-line character,
+   and then panics the kernel. */
+void
+fail (const char *format, ...) 
+{
+  va_list args;
+  
+  printf ("(%s) FAIL: ", test_name);
+  va_start (args, format);
+  vprintf (format, args);
+  va_end (args);
+  putchar ('\n');
+
+  PANIC ("test failed");
+}
+
+/* Prints a message indicating the current test passed. */
+void
+pass (void) 
+{
+  printf ("(%s) PASS\n", test_name);
+}
+

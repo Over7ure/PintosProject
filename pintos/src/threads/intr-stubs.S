@@ -23,7 +23,7 @@ intr_entry:
 	pushl %fs
 	pushl %gs
 	pushal
-
+        
 	/* Set up kernel environment. */
 	cld			/* String instructions go upward. */
 	mov $SEL_KDSEG, %eax	/* Initialize segment registers. */
@@ -49,7 +49,7 @@ intr_entry:
 .globl intr_exit
 .func intr_exit
 intr_exit:
-	/* Restore caller's registers. */
+        /* Restore caller's registers. */
 	popal
 	popl %gs
 	popl %fs

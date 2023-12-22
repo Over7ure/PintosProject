@@ -50,9 +50,3 @@ Functionality of system calls:
 3	rox-simple
 3	rox-child
 3	rox-multichild
-
-- Test floating point correctness
-3	fp-simul
-5	fp-asm
-5	fp-syscall
-3	fp-kernel-e
