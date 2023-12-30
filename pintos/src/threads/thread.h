@@ -5,6 +5,8 @@
 #include <list.h>
 #include <stdint.h>
 
+#include "threads/fixed_point.h"
+
 /* States in a thread's life cycle. */
 enum thread_status
   {
@@ -103,6 +105,12 @@ struct thread
     
     /* Record the time the thread has been blocked. */
     int64_t ticks_blocked;
+
+    int base_priority;                  /* Base priority. */
+    struct list locks;                  /* Locks that the thread is holding. */
+    struct lock *lock_waiting;          /* The lock that the thread is waiting for. */
+    int nice;                           /* Niceness. */
+    fixed_t recent_cpu;                 /* Recent CPU. */
   };
 
 /* If false (default), use round-robin scheduler.
@@ -117,7 +125,7 @@ void thread_tick (void);
 void thread_print_stats (void);
 
 typedef void thread_func (void *aux);
-tid_t thread_create (const char *name, int priority, thread_func *, void *);
+tid_t thread_create (const char *, int, thread_func *, void *);
 
 void thread_block (void);
 void thread_unblock (struct thread *);
@@ -141,6 +149,15 @@ void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
-void blocked_thread_check (struct thread *t, void *aux UNUSED);
+void thread_hold_the_lock(struct lock *);
+void thread_donate_priority (struct thread *);
+void thread_remove_lock (struct lock *);
+void thread_update_priority (struct thread *);
+bool thread_cmp_priority (const struct list_elem *, const struct list_elem *, void *aux);
+void thread_mlfqs_increase_recent_cpu_by_one (void);
+void thread_mlfqs_update_load_avg_and_recent_cpu (void);
+void thread_mlfqs_update_priority (struct thread *);
+
+void blocked_thread_check (struct thread *, void *aux);
 
 #endif /* threads/thread.h */
